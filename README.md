@@ -1,7 +1,7 @@
 # ku-swaicamp-group6
 
 # Team name
-GAR (갈)
+GAR!
 
 # Team
 - 이준석 *팀장*
