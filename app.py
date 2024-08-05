@@ -13,3 +13,4 @@ text_to_summarize = st.text_area("Enter text to summarize")
 if st.button('Summarize'):
     summary = summarize_text(text_to_summarize)
     st.write(summary)
+
