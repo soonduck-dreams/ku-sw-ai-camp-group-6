@@ -10,10 +10,9 @@ GAR!
 - 전장원
 
 ## Git을 처음 쓰는 팀원들을 위한 가이드
-*written by ChatGPT(95%), GitHub 담당자(5%)*
 
 ### 0. Git 설치
-구글에 git 검색해서 설치 ㄱㄱ
+구글에 git 검색해서 설치하세요
 
 ### 1. Git 소개
 
