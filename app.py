@@ -3,7 +3,7 @@
 import streamlit as st
 from logics.example_logics import get_greeting, summarize_text
 
-st.title('안녕')
+st.title('JJH')
 
 if st.button('Greet'):
     greeting = get_greeting()
