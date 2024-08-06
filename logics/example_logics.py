@@ -2,11 +2,12 @@
 
 from openai import OpenAI
 from prompts import example_prompts
-from prompts.example_prompts import greeting_prompt, summary_prompt, if_dbart_only_prompt, extract_keyword_prompt
+from prompts.example_prompts import greeting_prompt, summary_prompt, if_dbart_only_prompt, extract_keyword_prompt, get_clear_query_prompt
 import os
 from dotenv import load_dotenv
 import faiss
 import numpy as np
+import copy
 
 load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -108,15 +109,34 @@ def answer_art(messages, db_art, db_etc):
         + [
             {"user": "user", "content": ask},
             #{"role": "system", "content": system_message}
-        ]
+        ],
         stream=True
     )
     return stream
 
 def ask(messages):
+    messages_with_clear_query = copy.deepcopy(messages)
+    messages_with_clear_query[-1]['content'] = get_clear_query(messages, verbose=True)
+
     stream = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=messages,
+        messages=messages_with_clear_query,
         stream=True
     )
     return stream
+
+# messages를 입력으로 받아, 사용자가 마지막에 보낸 내용을 맥락을 반영해 변환하고, 그 결과를 출력합니다.
+# verbose=True로 설정 시 어떻게 변환됐는지 확인할 수 있습니다.
+def get_clear_query(messages, verbose=False):
+    prompt = get_clear_query_prompt(messages)
+
+    clear_query = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=prompt
+    ).choices[0].message.content
+
+    if verbose:
+        print(f"\nBefore: {messages[-1]['content']}")
+        print(f" After: {clear_query}\n")
+
+    return clear_query

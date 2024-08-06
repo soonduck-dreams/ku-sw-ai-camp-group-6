@@ -2,6 +2,9 @@
 
 # 다양한 예시 프롬프트 정의
 # 특정 task를 위한 프롬프트마다 prompts 폴더 안에서 별도의 .py 파일로 만들어서 관리하면 좋을 것 같습니다.
+
+import logics.util as util
+
 greeting_prompt = [
     {"role": "system", "content": "You are a helpful assistant. Speak in Korean."},
     {"role": "user", "content": "Hello! How can I assist you today?"}
@@ -28,3 +31,23 @@ extract_keyword_prompt = [
                 "예시로는 /[작가명]:이중섭, [부문]:조각이 아닌 것/ 형태로 만들 수 있겠지."},
 ]
 
+def get_clear_query_prompt(messages):
+  user_last_message = messages[-1]['content']
+  
+  user_prefix = "Rewrite this so that context is clarified. Act as if you are the user. Be as faithful as the given text:"
+
+  prompt = [
+    {'role': 'system', 'content': "Your task is to clarify the user's last message based on the previous context of the conversation."},
+    {'role': 'user', 'content': f'{user_prefix} 더 자세히 설명해 주세요.'},
+    {'role': 'assistant', 'content': '이중섭이 왜 소를 소재로 많은 그림을 그렸는지 더 자세히 설명해 주세요.'},
+    {'role': 'user', 'content': f'{user_prefix} 그의 라이벌이 있었나요?'},
+    {'role': 'assistant', 'content': '알레산드로 보티첼리의 라이벌이었던 다른 화가들에 대해 알려주세요.'},
+    {'role': 'user', 'content': f'{user_prefix} 그가 그런 식으로 활동하는 이유를 한 줄로 얘기하면?'},
+    {'role': 'assistant', 'content': '알레산드로 보티첼리의 라이벌이었던 다른 화가들에 대해 알려주세요.'},
+    {'role': 'user', 'content': f'{user_prefix} 안녕!'},
+    {'role': 'assistant', 'content': '안녕!'},
+    {'role': 'system', 'content': f'Here is the conversation history: {util.messages_to_string(messages)}'},
+    {'role': 'user', 'content': f'{user_prefix} {user_last_message}'},
+    ]
+
+  return prompt
