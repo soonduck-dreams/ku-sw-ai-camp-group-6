@@ -110,3 +110,11 @@ def answer_art(messages, ask, db_art, db_etc):
         ]
     )
     return response
+
+def ask(messages):
+    stream = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        stream=True
+    )
+    return stream
