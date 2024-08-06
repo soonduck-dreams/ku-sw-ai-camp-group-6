@@ -5,6 +5,8 @@ from prompts import example_prompts
 from prompts.example_prompts import greeting_prompt, summary_prompt, if_dbart_only_prompt, extract_keyword_prompt
 import os
 from dotenv import load_dotenv
+import faiss
+import numpy as np
 
 load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -38,10 +40,12 @@ def get_embedding(input):
 
 
 def get_data_from_db(query, db):
+    #제작중
     query_embed = get_embedding(query)[0].embedding
 
 
 def extract_keyword(text):
+    #query에서 keyword만을 추출하도록 LLM에게 시키는 함수
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -52,50 +56,47 @@ def extract_keyword(text):
     return response
 
 
-def get_data_from_db_tuned(query, db):
-    query_embed
-    response = client.embeddings.create(
-        input=input,
-        model="text-embedding-3-small"
-    )
-    return response.data
-    
-    query_embed = get_embedding(query)[0].embedding
+def get_data_from_db_tuned(query, db_art, db_etc):
+    #query: user의 질문
+    #db_art: art관련 db
+    #db_etc: 기타 내용 관련 db
 
-    index = faiss.IndexFlatL2(len(news_data[0][1]))
+    query_keyword = extract_keyword(query)  
+    #query_keyword: query의 keyword만을 추출
+    query_embed = get_embedding(query_keyword)[0].embedding
+    #query_embed: query_keyword를 바탕으로 embedding을 추출
 
-    datalist = []
-    for each_data in news_data:
-        datalist.append(each_data[1])
-    index.add(np.array(datalist))
-
-    k = 7
-    distances, indices = index.search(np.array([query_embed]), k)
-
-    input_news_data = ""
-    for i in indices[0]:
-        input_news_data += "[TITLE]: " + news_data[i][0]['title']
-        input_news_data += "[HILIGHT]: " + news_data[i][0]['hilight'] + "//"
-
-    system_message = "user의 앞선 질문에 대한 최신 뉴스 7종에 대한 검색은 다음과 같음."\
-    "질문과 상관성이 부족한 검색 결과가 있을 경우 대답에 활용하지 말 것.: " + input_news_data
-
-    stream = client.chat.completions.create(
+    if_dbart_only = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "user", "content": query},
-            {"role": "system", "content": system_message}
+            {"role": "system", "content": if_dbart_only_prompt}
         ],
-        #stream=True,
     )
+    #if_dbart_only: query가 특정 작품에 대한 설명만을 대답으로 하는 질문이라면 db_art만 사용하라는 대답을,
+    #그게 아니라면 db_art, db_etc 둘 다 사용하라는 대답을 낼 것임 (대답은 아마 대화문 형식일 것)
 
-    #response = st.write_stream(stream)
-    
-    st.text_area("[Answer]", value=stream.choices[0].message.content, height=500)
+
+    # 현재 여기까지 진행중
+
+    index = faiss.IndexFlatL2(len(query_embed))
+
+    db_embedding = db[1]
+    index.add(np.array(db_embedding))
+
+    k = 5
+    distances, indices = index.search(np.array([query_keyword]), k)
+
+    input_string = ""
+    for i in indices[i]:
+        input_string += "data" + str(i + 1) + ": " + db[0][i] + "//"
+
+
+
 
 
 def answer_art(messages, ask, db_art, db_etc):
-    #사용자의 질문에 대해 답하는 기본 함수
+    #사용자의 질문에 대해 답하는 기본 함수 만드는 중
     #messages: 지금껏 주고받은 message 기록 ex)st.session_state.messages
     #ask: 사용자의 질문
     #db_art: 예술품 DB, db_etc: 기타 DB

@@ -13,7 +13,11 @@ summary_prompt = [
 ]
 
 if_dbart_only_prompt = [
-    {"role": "system", "content": "네가 생성할 대답이 특정 작품에 대한 설명이라면, db_art."},
+    {"role": "system", "content": "위 user의 질문에 대해 네가 생성할 대답이 특정 작품에 대한 설명이라면, db_art 에서만 data를 검색해서 대답해야 해."\
+     "그렇지 않다면, db_art 및 db_etc 모두에서 data를 검색해야 해."\
+        "예시 질문1: /이중섭의 황소에 대해 알려줘/ -> db_art의 검색 결과만을 보고 대답해야 함."\
+            "예시 질문2: /이중섭의 황소에 담긴 뜻을 알려줘/ -> db_art와 db_etc의 검색 결과를 모두 활용해야 함."\
+                "user 질문에 대한 너의 대답이 db_art만 검색해야 할 지, db_art와 db_etc를 모두 검색해야 할 지 대답해."},
 ]
 
 extract_keyword_prompt = [
@@ -23,3 +27,4 @@ extract_keyword_prompt = [
             "user의 질문에 대해 최적의 대답을 얻어내기 위해 DATABASE에서 검색할 keyword들을 추출해봐."\
                 "예시로는 /[작가명]:이중섭, [부문]:조각이 아닌 것/ 형태로 만들 수 있겠지."},
 ]
+
