@@ -11,3 +11,7 @@ summary_prompt = [
     {"role": "system", "content": "You are a summarization assistant."},
     {"role": "user", "content": "Summarize the following text: {text}"}
 ]
+
+if_dbart_only_prompt = [
+    {"role": "system", "content": "네가 생성할 대답이 특정 작품에 대한 설명이라면, db_art."},
+]
