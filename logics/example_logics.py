@@ -1,7 +1,8 @@
 # logics/example_logics.py
 
 from openai import OpenAI
-from prompts.example_prompts import greeting_prompt, summary_prompt
+from prompts import example_prompts
+from prompts.example_prompts import greeting_prompt, summary_prompt, if_dbart_only_prompt, extract_keyword_prompt
 import os
 from dotenv import load_dotenv
 
@@ -44,17 +45,15 @@ def extract_keyword(text):
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": m["role"], "content": m["content"]} for m in messages
-        ]
-        + [
             {"user": "user", "content": text},
-            #{"role": "system", "content": system_message}
+            {"role": "system", "content": extract_keyword_prompt}
         ]
     )
     return response
 
 
 def get_data_from_db_tuned(query, db):
+    query_embed
     response = client.embeddings.create(
         input=input,
         model="text-embedding-3-small"
