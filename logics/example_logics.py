@@ -56,20 +56,20 @@ def extract_keyword(text):
     return response
 
 
-def get_data_from_db_tuned(ask, db_art, db_etc):
+def get_data_from_db_tuned(query, db_art, db_etc):
     #query: user의 질문
     #db_art: art관련 db
     #db_etc: 기타 내용 관련 db
 
-    query_keyword = extract_keyword(ask)  
+    #query_keyword = extract_keyword(query)  
     #query_keyword: query의 keyword만을 추출
-    query_embed = get_embedding(query_keyword)[0].embedding
+    query_embed = get_embedding(query)[0].embedding
     #query_embed: query_keyword를 바탕으로 embedding을 추출
 
     if_dbart_only = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "user", "content": ask},
+            {"role": "user", "content": query},
             {"role": "system", "content": if_dbart_only_prompt}
         ],
     )
@@ -100,7 +100,7 @@ def answer_art(messages, db_art, db_etc):
     #messages: 지금껏 주고받은 message 기록 ex)st.session_state.messages
     #ask: 사용자의 질문
     #db_art: 예술품 DB, db_etc: 기타 DB
-    response = client.chat.completions.create(
+    stream = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": m["role"], "content": m["content"]} for m in messages
@@ -109,8 +109,9 @@ def answer_art(messages, db_art, db_etc):
             {"user": "user", "content": ask},
             #{"role": "system", "content": system_message}
         ]
+        stream=True
     )
-    return response
+    return stream
 
 def ask(messages):
     stream = client.chat.completions.create(
