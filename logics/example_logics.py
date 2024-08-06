@@ -2,7 +2,7 @@
 
 from openai import OpenAI
 from prompts import example_prompts
-from prompts.example_prompts import greeting_prompt, summary_prompt, if_dbart_only_prompt, extract_keyword_prompt
+from prompts.example_prompts import greeting_prompt, summary_prompt, if_dbart_only_messages, extract_keyword_prompt
 import os
 from dotenv import load_dotenv
 import faiss
@@ -39,11 +39,6 @@ def get_embedding(input):
     return response.data
 
 
-def get_data_from_db(ask, db):
-    #제작중
-    query_embed = get_embedding(ask)[0].embedding
-
-
 def extract_keyword(text):
     #query에서 keyword만을 추출하도록 LLM에게 시키는 함수
     response = client.chat.completions.create(
@@ -56,7 +51,23 @@ def extract_keyword(text):
     return response
 
 
-def get_data_from_db_tuned(query, db_art, db_etc):
+def decide_dbart_only(query):
+    #query가 db_art만을 활용한 답안을 내놓아야 할 질문인지 아닌지를 T/F (bool 타입)으로 대답한다.
+    #대답을 생성하는 과정 자체에는 db_art와 db_etc를 모두 활용할 수 있으나, 대답에 들어갈 text는 db_art에서만 뽑아와야 할 것.
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=if_dbart_only_messages + [
+            {"role": "user", "content": query},
+        ],
+    )
+    if response == "True":
+        if_dbart_only = True
+    else:
+        if_dbart_only = False
+    return if_dbart_only
+
+
+def get_data_from_db(query, db_art, db_etc):
     #query: user의 질문
     #db_art: art관련 db
     #db_etc: 기타 내용 관련 db
@@ -64,24 +75,19 @@ def get_data_from_db_tuned(query, db_art, db_etc):
     #query_keyword = extract_keyword(query)  
     #query_keyword: query의 keyword만을 추출
     query_embed = get_embedding(query)[0].embedding
-    #query_embed: query_keyword를 바탕으로 embedding을 추출
+    #query_embed: query_keyword를 바탕으로 embedding을 추출 (float list)
 
-    if_dbart_only = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "user", "content": query},
-            {"role": "system", "content": if_dbart_only_prompt}
-        ],
-    )
-    #if_dbart_only: query가 특정 작품에 대한 설명만을 대답으로 하는 질문이라면 db_art만 사용하라는 대답을,
-    #그게 아니라면 db_art, db_etc 둘 다 사용하라는 대답을 낼 것임 (대답은 아마 대화문 형식일 것)
+    if_dbart_only = decide_dbart_only(query)
+    #if_dbart_only: query가 특정 작품에 대한 설명만을 대답으로 하는 질문이라면 True, 아니라면 False (bool type)
+
+    
 
 
     # 현재 여기까지 진행중
 
     index = faiss.IndexFlatL2(len(query_embed))
 
-    db_embedding = db[1]
+    db_embed = db[1]
     index.add(np.array(db_embedding))
 
     k = 5

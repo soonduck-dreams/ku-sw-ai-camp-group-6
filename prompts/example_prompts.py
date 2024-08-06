@@ -13,12 +13,22 @@ summary_prompt = [
 ]
 
 if_dbart_only_prompt = [
-    {"role": "system", "content": "위 user의 질문에 대해 네가 생성할 대답이 특정 작품에 대한 설명이라면, db_art 에서만 data를 검색해서 대답해야 해."\
-     "그렇지 않다면, db_art 및 db_etc 모두에서 data를 검색해야 해."\
-        "예시 질문1: /이중섭의 황소에 대해 알려줘/ -> db_art의 검색 결과만을 보고 대답해야 함."\
-            "예시 질문2: /이중섭의 황소에 담긴 뜻을 알려줘/ -> db_art와 db_etc의 검색 결과를 모두 활용해야 함."\
-                "user 질문에 대한 너의 대답이 db_art만 검색해야 할 지, db_art와 db_etc를 모두 검색해야 할 지 대답해."},
-]
+    {"role": "system", "content": "위 user의 질문에 대해 네가 생성할 대답이 특정 작품에 대한 설명이라면, db_art의 데이터만 활용해서 대답해야 해."\
+     "그렇지 않다면, db_art 및 db_etc 모두를 활용해 대답을 형성해야 해. db_art만 써야하면 True를, 둘 모두를 써야하면 False를 대답해."\
+        "예시 질문1: /이중섭의 황소에 대해 알려줘/ -> (db_art의 데이터만을 써서 대답해야 함.) 대답: True"\
+            "예시 질문2: /황소와 비슷한 작품을 추천해줘/ -> (db_art의 데이터만을 써서 대답해야 함.) 대답: True"\
+                "예시 질문3: /이중섭의 황소에 담긴 뜻을 알려줘/ -> (db_art와 db_etc의 데이터를 모두 활용해야 함. 대답: False"\
+                    "."},
+]   #미사용
+
+if_dbart_only_messages=[{'role': 'system', 'content': "user의 질문에 대해 네가 생성할 대답이 특정 작품에 대한 설명이라면, db_art의 데이터만 활용해서 대답해야 해."\
+     "그렇지 않다면, db_art 및 db_etc 모두를 활용해 대답을 형성해야 해. db_art만 써야하면 True를, 둘 모두를 써야하면 False를 대답해."},
+        {'role': 'user', 'content': '이중섭의 황소에 대해 알려줘'},
+        {'role': 'assistant', 'content': 'True'},
+        {'role': 'user', 'content': '황소와 비슷한 작품을 추천해줘'},
+        {'role': 'assistant', 'content': 'True'},
+        {'role': 'user', 'content': '이중섭의 황소에 담긴 뜻을 알려줘'},
+        {'role': 'assistant', 'content': 'False'},]
 
 extract_keyword_prompt = [
     {"role": "system", "content": "위 user 질문을 database에서 검색하려고 해."\
