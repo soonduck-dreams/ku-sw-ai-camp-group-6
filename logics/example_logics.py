@@ -39,9 +39,9 @@ def get_embedding(input):
     return response.data
 
 
-def get_data_from_db(query, db):
+def get_data_from_db(ask, db):
     #제작중
-    query_embed = get_embedding(query)[0].embedding
+    query_embed = get_embedding(ask)[0].embedding
 
 
 def extract_keyword(text):
@@ -56,12 +56,12 @@ def extract_keyword(text):
     return response
 
 
-def get_data_from_db_tuned(query, db_art, db_etc):
+def get_data_from_db_tuned(ask, db_art, db_etc):
     #query: user의 질문
     #db_art: art관련 db
     #db_etc: 기타 내용 관련 db
 
-    query_keyword = extract_keyword(query)  
+    query_keyword = extract_keyword(ask)  
     #query_keyword: query의 keyword만을 추출
     query_embed = get_embedding(query_keyword)[0].embedding
     #query_embed: query_keyword를 바탕으로 embedding을 추출
@@ -69,7 +69,7 @@ def get_data_from_db_tuned(query, db_art, db_etc):
     if_dbart_only = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "user", "content": query},
+            {"role": "user", "content": ask},
             {"role": "system", "content": if_dbart_only_prompt}
         ],
     )
@@ -95,7 +95,7 @@ def get_data_from_db_tuned(query, db_art, db_etc):
 
 
 
-def answer_art(messages, ask, db_art, db_etc):
+def answer_art(messages, db_art, db_etc):
     #사용자의 질문에 대해 답하는 기본 함수 만드는 중
     #messages: 지금껏 주고받은 message 기록 ex)st.session_state.messages
     #ask: 사용자의 질문
