@@ -1,7 +1,7 @@
 # app.py
 
 import streamlit as st
-from logics.example_logics import get_greeting, summarize_text
+import logics.main_logics as main_logics
 from prompts.initial_prompts import initial_prompt
 
 st.title('ADY: AI Docent For You')
@@ -20,4 +20,7 @@ if user_prompt:
   with st.chat_message('user'):
     st.markdown(user_prompt)
   
-  # TODO: 모델한테 메시지 보내고 받아서 표시하는 거 추가하기
+  stream = main_logics.ask(st.session_state.messages)
+  with st.chat_message("assistant"):
+     response = st.write_stream(stream)
+  st.session_state.messages.append({'role': 'assistant', 'content': response})
