@@ -1,4 +1,4 @@
-# logics/example_logics.py
+# logics/main_logics.py
 
 from openai import OpenAI
 from prompts.main_prompts import get_clear_query_prompt
@@ -17,7 +17,9 @@ client = OpenAI(api_key=openai_api_key)
 
 def get_embedding(input):
     """input을 임베딩한 결과를 return하는 함수
-    """;
+    Args:
+        input (string): 임베딩할 string
+    """
     response = client.embeddings.create(
         input=input,
         model="text-embedding-3-small"
