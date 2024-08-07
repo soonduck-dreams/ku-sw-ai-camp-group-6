@@ -1,7 +1,7 @@
 # app.py
 
 import streamlit as st
-from logics.example_logics import get_greeting, summarize_text, ask
+import logics.main_logics as main_logics
 from prompts.initial_prompts import initial_prompt
 
 st.title('ADY: AI Docent For You')
@@ -20,12 +20,7 @@ if user_prompt:
   with st.chat_message('user'):
     st.markdown(user_prompt)
   
-  stream = ask(st.session_state.messages)
+  stream = main_logics.ask(st.session_state.messages)
   with st.chat_message("assistant"):
      response = st.write_stream(stream)
   st.session_state.messages.append({'role': 'assistant', 'content': response})
-
-reset_messages_button = st.button("대화 처음부터 시작")
-if reset_messages_button:
-   del st.session_state['messages']
-   st.rerun()
