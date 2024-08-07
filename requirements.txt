@@ -4,3 +4,4 @@ python-dotenv
 PyMuPDF
 faiss-cpu 
 numpy
+nltk
