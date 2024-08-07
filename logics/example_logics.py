@@ -103,7 +103,7 @@ def get_data_from_db(query, db_art, db_etc):
 
 
 
-def ask(messages, db_art, db_etc):
+def ask(messages, db_art=None, db_etc=None):
     """사용자의 질문에 대해 답하는 기본 함수 만드는
 
     Args:
