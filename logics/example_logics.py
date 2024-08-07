@@ -2,7 +2,7 @@
 
 from openai import OpenAI
 from prompts import example_prompts
-from prompts.example_prompts import greeting_prompt, summary_prompt, if_dbart_only_messages, extract_keyword_prompt, get_clear_query_prompt
+from prompts.example_prompts import greeting_prompt, summary_prompt, get_clear_query_prompt
 import os
 from dotenv import load_dotenv
 import faiss
@@ -102,25 +102,14 @@ def get_data_from_db(query, db_art, db_etc):
 
 
 
-def answer_art(messages, db_art, db_etc):
-    #사용자의 질문에 대해 답하는 기본 함수 만드는 중
-    #messages: 지금껏 주고받은 message 기록 ex)st.session_state.messages
-    #ask: 사용자의 질문
-    #db_art: 예술품 DB, db_etc: 기타 DB
-    stream = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": m["role"], "content": m["content"]} for m in messages
-        ]
-        + [
-            {"user": "user", "content": ask},
-            #{"role": "system", "content": system_message}
-        ],
-        stream=True
-    )
-    return stream
 
-def ask(messages):
+def ask(messages, db_art, db_etc):
+    """사용자의 질문에 대해 답하는 기본 함수 만드는
+
+    Args:
+        messages: 지금껏 주고받은 message 기록 ex)st.session_state.messages
+        db_art: 예술품 DB, db_etc: 기타 DB
+    """
     messages_with_clear_query = copy.deepcopy(messages)
     messages_with_clear_query[-1]['content'] = get_clear_query(messages, verbose=True)
 
