@@ -30,6 +30,6 @@ def sliding_window(tokens, window_size, step_size):
     return chunks
 
 
-
+documents = pdf_path
 
 embeddings = np.array([get_embedding(doc)[0] for doc in documents if doc.strip() != ''])
