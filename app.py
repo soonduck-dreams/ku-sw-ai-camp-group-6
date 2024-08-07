@@ -2,7 +2,6 @@
 
 import streamlit as st
 from logics.example_logics import get_greeting, summarize_text, ask
-from logics.example_logics import get_greeting, summarize_text, ask
 from prompts.initial_prompts import initial_prompt
 
 st.title('ADY: AI Docent For You')
