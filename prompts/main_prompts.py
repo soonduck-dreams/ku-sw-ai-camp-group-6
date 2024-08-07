@@ -32,3 +32,8 @@ def get_clear_query_prompt(messages):
     ]
 
   return prompt
+
+answer_based_on_data = [
+  {'role': 'system', 'content': '위 유저의 질문에 대답하되, 검색된 데이터 중 상관성이 낮은 데이터는 무조건 쓰지마.'\
+    '예술품 관련 data는 조금 더 신뢰도가 높은 데이터라고 생각하렴.'},
+]
