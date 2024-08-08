@@ -3,6 +3,7 @@ import os
 import csv
 import numpy as np
 import nltk
+import time
 
 # Add the project root to the Python path
 current_dir = os.path.dirname(__file__)
@@ -47,7 +48,7 @@ def embed_data(data_dict):
     """Embed the data using the embedding function and return a dictionary with embeddings."""
     embedded_data = {}
     for key, value in data_dict.items():
-        text = ' '.join(value.values())
+        text = str(value).strip('{}')
         embedding = get_embedding(text)
         embedded_data[key] = {
             'data': value,
@@ -106,9 +107,9 @@ else:
 
 # Example of accessing the embedded data
 print("\nFinal Embedded Data Structure:")
+embedded_data_list = []
 for key, value in embedded_data_dict.items():
-    print(f"Key: {key}")
-    print(f"Data: {value['data']}")
-    print(f"Embedding: {value['embedding']}\n")
+    embedded_data_list.append((value['data'], value['embedding'][0].embedding))
+print(embedded_data_list)
 
 # Now you can use the `embedded_data_dict` for retrieval-augmented generation (RAG) tasks
