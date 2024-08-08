@@ -8,14 +8,18 @@ from dotenv import load_dotenv
 import faiss
 import numpy as np
 import copy
-from logics.util import messages_to_string
+from logics.util import get_embedding, messages_to_string
+
 
 
 #이하는 test용 database import입니다
 import utils.example_artdata_result as ex1
 import utils.example_etcdata_result as ex2
-art_data = ex1.data
-etc_data = ex2.data
+
+import database.database2 as db2
+import database.database1 as db1
+art_data = db1.data
+etc_data = db2.data
 
 
 
@@ -23,17 +27,6 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
 client = OpenAI(api_key=openai_api_key)
-
-def get_embedding(input):
-    """input을 임베딩한 결과를 return하는 함수
-    Args:
-        input (string): 임베딩할 string
-    """
-    response = client.embeddings.create(
-        input=input,
-        model="text-embedding-3-small"
-    )
-    return response.data
 
 
 def artdata_to_string(data):
