@@ -43,6 +43,39 @@ def sliding_window(tokens, window_size=1000, step_size=500):
             break
     return chunks
 
+def embed_data(data_dict):
+    """Embed the data using the embedding function and return a dictionary with embeddings."""
+    embedded_data = {}
+    for key, value in data_dict.items():
+        text = ' '.join(value.values())
+        embedding = get_embedding(text)
+        embedded_data[key] = {
+            'data': value,
+            'embedding': embedding
+        }
+        print(f"Embedded data for key: {key}")
+    return embedded_data
+
+def summarize_embeddings(embedded_data_dict):
+    """Summarize the embeddings to check if they were generated successfully."""
+    summary = {
+        'total_entries': len(embedded_data_dict),
+        'embedding_lengths': [],
+        'failed_embeddings': []
+    }
+
+    for key, value in embedded_data_dict.items():
+        embedding = value['embedding']
+        if embedding:
+            summary['embedding_lengths'].append(len(embedding))
+        else:
+            summary['failed_embeddings'].append(key)
+
+    average_length = np.mean(summary['embedding_lengths']) if summary['embedding_lengths'] else 0
+    summary['average_embedding_length'] = average_length
+
+    return summary
+
 # CSV file path relative to the current file
 csv_path = os.path.join(current_dir, "이중섭_김환기.csv")
 
@@ -54,30 +87,25 @@ if not csv_data_dict:
 print("CSV Data Dictionary:")
 for key, value in csv_data_dict.items():
     print(f"{key}: {value}")
-    
 
-# Concatenate all descriptions into a single text if chunking is needed
-all_text = ' '.join([' '.join(value.values()) for value in csv_data_dict.values()])
-print("All Text:")
-print(all_text[:1000])  # Print first 1000 characters for brevity
+# Embed the data
+embedded_data_dict = embed_data(csv_data_dict)
 
-# Tokenize and chunk if necessary
-tokens = tokenize_text(all_text)
-print("Tokens:")
-print(tokens[:100])  # Print first 100 tokens for brevity
+# Summarize the embedding results
+embedding_summary = summarize_embeddings(embedded_data_dict)
 
-chunks = sliding_window(tokens, window_size=1000, step_size=500)
-print("Chunks:")
-for i, chunk in enumerate(chunks):
-    print(f"Chunk {i+1}: {chunk[:200]}")  # Print first 200 characters of each chunk for brevity
+# Print the summary
+print("\nEmbedding Summary:")
+print(f"Total entries: {embedding_summary['total_entries']}")
+print(f"Average embedding length: {embedding_summary['average_embedding_length']}")
+print(f"Failed embeddings: {embedding_summary['failed_embeddings']}")
+if embedding_summary['failed_embeddings']:
+    print(f"Number of failed embeddings: {len(embedding_summary['failed_embeddings'])}")
+else:
+    print("All embeddings generated successfully.")
 
-def count_tokens(text):
-    """Count total number of tokens in text."""
-    tokens = tokenize_text(text)
-    return len(tokens)
+# Example of accessing the embedded data
+for key, value in embedded_data_dict.items():
+    print(f"Key: {key}, Embedding Length: {len(value['embedding']) if value['embedding'] else 'Failed'}")
 
-# Check total number of tokens
-total_tokens = count_tokens(all_text)
-print(f"Total number of tokens: {total_tokens}")
-
-# Now you can use the `chunks` for embedding or any other RAG-related processing.
+# Now you can use the `embedded_data_dict` for retrieval-augmented generation (RAG) tasks
