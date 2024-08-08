@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import faiss
 import numpy as np
 import copy
+from logics.util import messages_to_string
 
 
 #이하는 test용 database import입니다
@@ -118,7 +119,7 @@ def get_clear_query(messages, verbose=False):
 
 
 
-def ask(messages, use_stream=False):
+def ask(messages, use_stream=False, use_RAG=False):
     """사용자의 질문에 대해 답하는 메인 함수
     Args:
         messages: 지금껏 주고받은 message 기록 ex)st.session_state.messages
@@ -127,24 +128,27 @@ def ask(messages, use_stream=False):
 
     messages_with_clear_query = copy.deepcopy(messages)
     user_last_message_index = get_user_last_message_index(messages_with_clear_query)
-    clear_query = get_clear_query(messages, verbose=True)
+    clear_query = get_clear_query(messages)
     messages_with_clear_query[user_last_message_index]['content'] = clear_query
     
-    db_art = art_data
-    db_etc = etc_data
-    
-    art_data_string = get_art_data_from_db(clear_query, db_art)
-    etc_data_string = get_etc_data_from_db(clear_query, db_etc)
-    messages_with_clear_query += ([
-        {"role": "system", "content": etc_data_string},
-        {"role": "system", "content": art_data_string},
-    ]
-    + main_prompts.answer_based_on_data)
-    #etc_data_string: 사용자 질문(가공됨)에 대한 기타 데이터를 제공.
-    #art_data_string: 사용자 질문(가공됨)에 대한 예술품 관련 데이터를 제공.
-    #clear_query: 사용자 질문을 지금까지의 문맥을 반영한 질문(즉, 가공됨)으로 변환해 제공.
-    #answer_based_on_data: assistant의 대답을 제어하는 문장. (더 좋은 아이디어가 있으면 수정해주세요)
-    
+    if use_RAG:
+        db_art = art_data
+        db_etc = etc_data
+        
+        art_data_string = get_art_data_from_db(clear_query, db_art)
+        etc_data_string = get_etc_data_from_db(clear_query, db_etc)
+        messages_with_clear_query += ([
+            {"role": "system", "content": etc_data_string},
+            {"role": "system", "content": art_data_string},
+        ]
+        + main_prompts.answer_based_on_data)
+        #etc_data_string: 사용자 질문(가공됨)에 대한 기타 데이터를 제공.
+        #art_data_string: 사용자 질문(가공됨)에 대한 예술품 관련 데이터를 제공.
+        #clear_query: 사용자 질문을 지금까지의 문맥을 반영한 질문(즉, 가공됨)으로 변환해 제공.
+        #answer_based_on_data: assistant의 대답을 제어하는 문장. (더 좋은 아이디어가 있으면 수정해주세요)
+
+
+    print(messages_to_string(messages_with_clear_query))
 
     if use_stream:
         stream = client.chat.completions.create(
