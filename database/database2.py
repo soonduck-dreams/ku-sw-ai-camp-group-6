@@ -52,7 +52,7 @@ chunks = sliding_window(pdf_text, window_size=1000, step_size=500)
 chunk_embedding_list = []
 for idx, chunk in enumerate(chunks, start=1):
     embedding = get_embedding(chunk)[0]
-    chunk_embedding_list.append((chunk, embedding))
+    chunk_embedding_list.append([chunk, embedding.embedding])
 
 
 # 결과 출력
