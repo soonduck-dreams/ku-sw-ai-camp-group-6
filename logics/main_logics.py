@@ -128,6 +128,10 @@ def ask(messages, use_stream=False):
     
     art_data_string = get_art_data_from_db(clear_query, db_art)
     etc_data_string = get_etc_data_from_db(clear_query, db_etc)
+    
+    print(art_data_string)
+    print(etc_data_string)
+    
     messages_with_clear_query += ([
         {"role": "system", "content": etc_data_string},
         {"role": "system", "content": art_data_string},
