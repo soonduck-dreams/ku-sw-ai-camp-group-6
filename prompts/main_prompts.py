@@ -13,20 +13,22 @@ if_dbart_only_messages=[{'role': 'system', 'content': "user의 질문에 대해 
 ''';
 
 def get_clear_query_prompt(messages):
-  user_last_message = messages[-1]['content']
+  user_last_message = ''
+  for message in messages[::-1]:
+    if message['role'] == 'user':
+      user_last_message = message
+      break
   
-  user_prefix = "Rewrite this so that context is clarified. Act as if you are the user. Be as faithful as the given text:"
+  user_prefix = "Rewrite this so that pronouns and missing contexts are clarified. However, DO NOT add unnecessary information. Act as if you are the user.:"
 
   prompt = [
     {'role': 'system', 'content': "Your task is to clarify the user's last message based on the previous context of the conversation."},
     {'role': 'user', 'content': f'{user_prefix} 더 자세히 설명해 주세요.'},
     {'role': 'assistant', 'content': '이중섭이 왜 소를 소재로 많은 그림을 그렸는지 더 자세히 설명해 주세요.'},
     {'role': 'user', 'content': f'{user_prefix} 그의 라이벌이 있었나요?'},
-    {'role': 'assistant', 'content': '알레산드로 보티첼리의 라이벌이었던 다른 화가들에 대해 알려주세요.'},
-    {'role': 'user', 'content': f'{user_prefix} 그가 그런 식으로 활동하는 이유를 한 줄로 얘기하면?'},
-    {'role': 'assistant', 'content': '알레산드로 보티첼리의 라이벌이었던 다른 화가들에 대해 알려주세요.'},
-    {'role': 'user', 'content': f'{user_prefix} 안녕!'},
-    {'role': 'assistant', 'content': '안녕!'},
+    {'role': 'assistant', 'content': '알레산드로 보티첼리의 라이벌이었던 다른 화가들이 있었나요?'},
+    {'role': 'user', 'content': f'{user_prefix} 좋아요'},
+    {'role': 'assistant', 'content': '좋아요'},
     {'role': 'system', 'content': f'Here is the conversation history: {util.messages_to_string(messages)}'},
     {'role': 'user', 'content': f'{user_prefix} {user_last_message}'},
     ]
