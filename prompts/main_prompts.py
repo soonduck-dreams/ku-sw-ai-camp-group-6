@@ -12,6 +12,39 @@ if_dbart_only_messages=[{'role': 'system', 'content': "user의 질문에 대해 
         {'role': 'assistant', 'content': 'False'},]
 ''';
 
+def artdata_to_string(data):
+    """예술품 관련 data를 string 형태로 변환
+    Args:
+        data (dict): 예술품 관련 data
+    """
+    ret_str = ""
+    for each_key in data.keys():
+        ret_str += "[" + each_key + "]: " + data[each_key]
+    return ret_str
+
+
+def make_db_art_to_string(db_art, art_idxs):
+    data_string = ""
+    data_string += "예술품 관련 data 목록: ["
+    for i in art_idxs[0]:
+        data_string += "예술품 data" + str(i + 1) + ": " + artdata_to_string(db_art[i][0]) + "//"
+    data_string += "]"
+    
+    return data_string
+  
+  
+  
+def make_db_etc_to_string(db_etc, etc_idxs):
+    data_string = ""
+    data_string += "기타 다양한 data 목록: ["
+    for i in etc_idxs[0]:
+        data_string += "기타 data" + str(i + 1) + ": " + db_etc[i][0] + "//"
+    data_string += "]"
+    
+    return data_string
+  
+
+
 def get_clear_query_prompt(messages):
   user_last_message = ''
   for message in messages[::-1]:
