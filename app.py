@@ -9,12 +9,7 @@ from pathlib import Path
 import time
 import copy
 
-#이하는 test용 database import입니다
-import utils.example_artdata_result as ex1
-import utils.example_etcdata_result as ex2
 
-art_data = ex1.data
-etc_data = ex2.data
 
 st.title('ADY: AI Docent For You')
 
@@ -65,10 +60,6 @@ if user_prompt and st.session_state.recent_modality == 'text':
   st.session_state.messages.append({'role': 'system', 'content': ui_logics.get_user_intent(clear_query)})
   with st.chat_message('user'):
     st.markdown(user_prompt)
-
-  #이하는 test용 database 사용입니다
-  art_data = ex1.data
-  etc_data = ex2.data
   
   response = main_logics.ask(st.session_state.messages)
   st.session_state.messages.append({'role': 'assistant', 'content': response})
