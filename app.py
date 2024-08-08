@@ -5,8 +5,8 @@ import logics.main_logics as main_logics
 from prompts.initial_prompts import initial_prompt
 
 #이하는 test용 database import입니다
-import example_artdata_result as ex_ad
-import example_etcdata_result as ex_ed
+import utils.example_artdata_result as ex1
+import utils.example_etcdata_result as ex2
 
 
 st.title('ADY: AI Docent For You')
@@ -26,10 +26,10 @@ if user_prompt:
     st.markdown(user_prompt)
 
   #이하는 test용 database 사용입니다
-  art_data = ex_ad.data
-  etc_data = ex_ed.data
+  art_data = ex1.data
+  etc_data = ex2.data
   
-  stream = main_logics.ask(st.session_state.messages, art_data, etc_data)
+  stream = main_logics.ask(st.session_state.messages, db_art = art_data, db_etc = etc_data)
   with st.chat_message("assistant"):
      response = st.write_stream(stream)
   st.session_state.messages.append({'role': 'assistant', 'content': response})
