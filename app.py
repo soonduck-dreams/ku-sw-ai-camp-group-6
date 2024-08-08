@@ -13,6 +13,8 @@ import copy
 import utils.example_artdata_result as ex1
 import utils.example_etcdata_result as ex2
 
+art_data = ex1.data
+etc_data = ex2.data
 
 st.title('ADY: AI Docent For You')
 
@@ -68,7 +70,7 @@ if user_prompt and st.session_state.recent_modality == 'text':
   art_data = ex1.data
   etc_data = ex2.data
   
-  response = main_logics.ask(st.session_state.messages, db_art = art_data, db_etc = etc_data)
+  response = main_logics.ask(st.session_state.messages)
   st.session_state.messages.append({'role': 'assistant', 'content': response})
   st.session_state.recent_modality = None
 

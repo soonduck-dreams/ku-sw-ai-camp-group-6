@@ -9,6 +9,15 @@ import faiss
 import numpy as np
 import copy
 
+
+#이하는 test용 database import입니다
+import utils.example_artdata_result as ex1
+import utils.example_etcdata_result as ex2
+art_data = ex1.data
+etc_data = ex2.data
+
+
+
 load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
@@ -58,14 +67,8 @@ def get_art_data_from_db(query, db_art):
     for i in art_idxs[0]:
         data_string += "예술품 data" + str(i + 1) + ": " + artdata_to_string(db_art[i][0]) + "//"
     data_string += "]"
-
-
-    k = 5
-    distances, indices = index.search(np.array([query_keyword]), k)
-
-    input_string = ""
-    for i in indices[i]:
-        input_string += "data" + str(i + 1) + ": " + db[0][i] + "//"
+    
+    return data_string
 
 
 def get_etc_data_from_db(query, db_etc):
@@ -115,7 +118,7 @@ def get_clear_query(messages, verbose=False):
 
 
 
-def ask(messages, db_art=None, db_etc=None, use_stream=False):
+def ask(messages, use_stream=False):
     """사용자의 질문에 대해 답하는 메인 함수
     Args:
         messages: 지금껏 주고받은 message 기록 ex)st.session_state.messages
@@ -126,6 +129,9 @@ def ask(messages, db_art=None, db_etc=None, use_stream=False):
     user_last_message_index = get_user_last_message_index(messages_with_clear_query)
     clear_query = get_clear_query(messages, verbose=True)
     messages_with_clear_query[user_last_message_index]['content'] = clear_query
+    
+    db_art = art_data
+    db_etc = etc_data
     
     art_data_string = get_art_data_from_db(clear_query, db_art)
     etc_data_string = get_etc_data_from_db(clear_query, db_etc)
