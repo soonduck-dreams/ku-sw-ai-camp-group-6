@@ -1,4 +1,8 @@
 streamlit
 openai
 python-dotenv
+PyMuPDF
+faiss-cpu 
+numpy
+nltk
 streamlit-mic-recorder
