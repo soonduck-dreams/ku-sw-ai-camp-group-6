@@ -105,7 +105,10 @@ else:
     print("All embeddings generated successfully.")
 
 # Example of accessing the embedded data
+print("\nFinal Embedded Data Structure:")
 for key, value in embedded_data_dict.items():
-    print(f"Key: {key}, Embedding Length: {len(value['embedding']) if value['embedding'] else 'Failed'}")
+    print(f"Key: {key}")
+    print(f"Data: {value['data']}")
+    print(f"Embedding: {value['embedding']}\n")
 
 # Now you can use the `embedded_data_dict` for retrieval-augmented generation (RAG) tasks
