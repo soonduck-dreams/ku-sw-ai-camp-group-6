@@ -14,20 +14,20 @@ from logics.main_logics import get_embedding
 # Ensure nltk punkt tokenizer is available
 nltk.download('punkt')
 
-def read_csv(file_path):
-    """Read CSV file and return its content as a list of strings."""
+def read_csv_to_dict(file_path):
+    """Read CSV file and return its content as a dictionary with '작품명' as keys."""
     encodings = ['utf-8', 'euc-kr', 'cp949']
     for encoding in encodings:
         try:
             print(f"Attempting to open CSV file: {file_path} with encoding: {encoding}")
             with open(file_path, newline='', encoding=encoding) as csvfile:
-                reader = csv.reader(csvfile)
-                data = [row for row in reader]
-            print(f"CSV data successfully read with encoding {encoding}. Number of rows: {len(data)}")
+                reader = csv.DictReader(csvfile)
+                data = {row['작품명']: row for row in reader}
+            print(f"CSV data successfully read with encoding {encoding}. Number of entries: {len(data)}")
             return data
         except Exception as e:
             print(f"Error reading CSV file with encoding {encoding}: {e}")
-    return []
+    return {}
 
 def tokenize_text(text):
     """Tokenize text into words."""
@@ -46,17 +46,18 @@ def sliding_window(tokens, window_size=1000, step_size=500):
 # CSV file path relative to the current file
 csv_path = os.path.join(current_dir, "이중섭_김환기.csv")
 
-# Read CSV file
-csv_data = read_csv(csv_path)
-if not csv_data:
+# Read CSV file into a dictionary
+csv_data_dict = read_csv_to_dict(csv_path)
+if not csv_data_dict:
     sys.exit("Failed to read CSV file with any encoding. Exiting...")
 
-print("CSV Data:")
-for i, row in enumerate(csv_data):
-    print(f"Row {i}: {row}")
+print("CSV Data Dictionary:")
+for key, value in csv_data_dict.items():
+    print(f"{key}: {value}")
+    
 
-# Concatenate all rows into a single text if chunking is needed
-all_text = ' '.join([' '.join(row) for row in csv_data])
+# Concatenate all descriptions into a single text if chunking is needed
+all_text = ' '.join([' '.join(value.values()) for value in csv_data_dict.values()])
 print("All Text:")
 print(all_text[:1000])  # Print first 1000 characters for brevity
 
