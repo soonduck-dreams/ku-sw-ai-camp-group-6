@@ -48,16 +48,13 @@ if not pdf_text:
 # 텍스트 슬라이딩 윈도우로 나누기
 chunks = sliding_window(pdf_text, window_size=1000, step_size=500)
 
-# 각 청크에 대해 임베딩 생성 및 출력
-embeddings = []
-for chunk in chunks:
+# 각 청크에 대해 임베딩 생성 및 (chunk, embedding) 튜플 리스트 생성 호출명 chunk_embedding_list임
+chunk_embedding_list = []
+for idx, chunk in enumerate(chunks, start=1):
     embedding = get_embedding(chunk)[0]
-    embeddings.append(embedding)
-    print(f"Chunk text: {chunk[:100]}...")  # 청크의 앞 100자만 출력
-    print(f"Embedding: {embedding}")       # 임베딩 값 출력
+    chunk_embedding_list.append((chunk, embedding))
 
-embeddings = np.array(embeddings)
 
 # 결과 출력
-print(f"Number of chunks: {len(chunks)}")
-print(f"Embeddings shape: {embeddings.shape}")
+print(f"Number of chunks: {len(chunk_embedding_list)}")
+print(f"First chunk and embedding: {chunk_embedding_list}")
