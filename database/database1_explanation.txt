@@ -1,0 +1,134 @@
+### Full Explanation of the Code
+
+The script performs the following steps:
+
+1. **Setup and Imports**:
+    - Adds the project root to the Python path to allow importing from other project modules.
+    - Imports necessary libraries including `csv` for reading CSV files, `nltk` for tokenizing text, and `numpy` for handling numerical operations.
+    - Downloads the NLTK tokenizer package.
+
+2. **Reading the CSV File**:
+    - The `read_csv_to_dict` function attempts to read the CSV file using multiple encodings (`utf-8`, `euc-kr`, `cp949`).
+    - Uses `csv.DictReader` to read the file and store each row as a dictionary where the key is the value from the "작품명" column and the value is the rest of the row as a dictionary.
+
+3. **Tokenization**:
+    - The `tokenize_text` function tokenizes input text into words using NLTK’s word tokenizer.
+
+4. **Chunking**:
+    - The `sliding_window` function creates text chunks using a sliding window approach to prepare the text for embedding. This is useful if the text is too long to be embedded in one go.
+
+5. **Embedding the Data**:
+    - The `embed_data` function embeds the text data using the `get_embedding` function.
+    - Each entry in the dictionary is converted to text and embedded, then stored in a new dictionary with the original data and its embedding.
+
+6. **Summarizing the Embeddings**:
+    - The `summarize_embeddings` function checks if the embeddings were generated successfully.
+    - It calculates the total number of entries, the lengths of embeddings, the average embedding length, and identifies any failed embeddings.
+
+7. **Printing the Results**:
+    - The script prints the original data dictionary and the embedding summary, including the length of each embedding.
+
+### Final Data Structure
+
+The final data structure, `embedded_data_dict`, is a dictionary where:
+- Each key is the "작품명" (name of the artwork).
+- Each value is another dictionary containing:
+  - The original row data (`data`).
+  - The embedding vector (`embedding`).
+
+Example structure:
+```python
+{
+    "Artwork1": {
+        "data": {
+            "작품명": "Artwork1",
+            "작가": "Artist1",
+            "연도": "Year1",
+            "설명": "Description1"
+        },
+        "embedding": [0.1, 0.2, 0.3, ..., 0.512]  # Embedding vector
+    },
+    "Artwork2": {
+        "data": {
+            "작품명": "Artwork2",
+            "작가": "Artist2",
+            "연도": "Year2",
+            "설명": "Description2"
+        },
+        "embedding": [0.1, 0.2, 0.3, ..., 0.512]  # Embedding vector
+    },
+    ...
+}
+```
+
+### Building a RAG (Retrieval-Augmented Generation) System
+
+To build a RAG system with this final data:
+
+1. **Indexing the Embeddings**:
+    - Use a vector store like FAISS (Facebook AI Similarity Search) to index the embeddings.
+    - This allows efficient similarity search to find relevant embeddings given a query.
+
+2. **Retrieving Relevant Documents**:
+    - For a given user query, convert the query into an embedding using the same embedding function.
+    - Use the vector store to find the nearest embeddings (most similar documents).
+
+3. **Generating Responses**:
+    - Combine the retrieved documents with the query to generate a response using a language model.
+    - The language model can be GPT-3, BERT, or any other transformer-based model capable of generating text.
+
+Here is an outline of how you can implement this:
+
+```python
+from faiss import IndexFlatL2
+import numpy as np
+
+# Assuming embedded_data_dict is already populated
+
+# Prepare data for FAISS
+embeddings = []
+keys = []
+for key, value in embedded_data_dict.items():
+    if value['embedding']:  # Ensure embedding exists
+        embeddings.append(value['embedding'])
+        keys.append(key)
+
+embeddings = np.array(embeddings).astype('float32')
+
+# Create and train the index
+index = IndexFlatL2(embeddings.shape[1])  # Using L2 (Euclidean) distance
+index.add(embeddings)
+
+def get_similar_documents(query_embedding, top_k=5):
+    """Retrieve top_k similar documents for a given query embedding."""
+    query_embedding = np.array(query_embedding).astype('float32').reshape(1, -1)
+    distances, indices = index.search(query_embedding, top_k)
+    results = [(keys[idx], distances[0][i]) for i, idx in enumerate(indices[0])]
+    return results
+
+# Example usage
+query_text = "Example query text about an artwork"
+query_embedding = get_embedding(query_text)
+similar_docs = get_similar_documents(query_embedding, top_k=5)
+
+print("Top similar documents:")
+for key, distance in similar_docs:
+    print(f"Key: {key}, Distance: {distance}, Data: {embedded_data_dict[key]['data']}")
+```
+
+### Summary
+
+1. **Embedding and Storing Data**:
+    - Read and process the CSV data.
+    - Embed the text data.
+    - Store the original data and its embeddings in a dictionary.
+
+2. **Indexing for Retrieval**:
+    - Use FAISS or a similar library to index the embeddings.
+    - Perform similarity searches to find relevant documents.
+
+3. **Generating Responses**:
+    - Combine retrieved documents with user queries.
+    - Use a language model to generate informative responses.
+
+This approach allows you to build a RAG system that effectively retrieves relevant information and generates responses based on embedded document data.
