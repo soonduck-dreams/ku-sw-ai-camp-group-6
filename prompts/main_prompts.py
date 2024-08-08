@@ -47,3 +47,25 @@ answer_based_on_data = [
         '긴 설명 후, 주요 포인트를 요약하고 강조해. 사용자가 핵심 정보를 놓치지 않도록 도와줘.'\
           '답변 후 사용자가 더 궁금한 점이 있는지 물어보고, 추가 질문을 유도해 사용자와의 상호작용을 높여.'},
 ]
+
+def get_user_intent_prompt(text, intent_list):
+  intent_list = ' '.join(intent_list)
+  prompt = [
+      {'role': 'system', 'content': f'사용자의 말을 다음 중 하나로 분류하라: {intent_list}'},
+      {'role': 'user', 'content': '안녕!'},
+      {'role': 'assistant', 'content': '일상적 대화'},
+      {'role': 'user', 'content': '그림이 너무 예쁘다.'},
+      {'role': 'assistant', 'content': '일상적 대화'},
+      {'role': 'user', 'content': '도슨트로 일한 지 얼마나 됐어?'},
+      {'role': 'assistant', 'content': '일상적 대화'},
+      {'role': 'user', 'content': '나는 지금 반 고흐의 해바라기를 보고 있어'},
+      {'role': 'assistant', 'content': '감상 중인 작품 밝히기'},
+      {'role': 'user', 'content': '이 작품에서 황소가 무슨 표정을 짓고 있는 거야?'},
+      {'role': 'assistant', 'content': '감상 중인 그림에 대한 직접적 질문'},
+      {'role': 'user', 'content': '이 그림을 구매한 이건희의 수집 철학에 대해 알고 있니?'},
+      {'role': 'assistant', 'content': '감상 중인 그림에 대한 간접적 질문'},
+      {'role': 'user', 'content': '같은 시대의 다른 작가를 추천해줘.'},
+      {'role': 'assistant', 'content': '추천 요청'},
+      {'role': 'user', 'content': text}
+    ]
+  return prompt
