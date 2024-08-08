@@ -85,7 +85,7 @@ def get_data_from_db(query, db_art, db_etc):
 
 
 
-def ask(messages, db_art=None, db_etc=None):
+def ask(messages, db_art=None, db_etc=None, use_stream=False):
     """사용자의 질문에 대해 답하는 기본 함수 만드는
 
     Args:
@@ -93,14 +93,22 @@ def ask(messages, db_art=None, db_etc=None):
         db_art: 예술품 DB, db_etc: 기타 DB
     """
     messages_with_clear_query = copy.deepcopy(messages)
-    messages_with_clear_query[-1]['content'] = get_clear_query(messages, verbose=True)
+    user_last_message_index = get_user_last_message_index(messages_with_clear_query)
+    messages_with_clear_query[user_last_message_index]['content'] = get_clear_query(messages, verbose=True)
 
-    stream = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages_with_clear_query,
-        stream=True
-    )
-    return stream
+    if use_stream:
+        stream = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages_with_clear_query,
+            stream=True
+        )
+        return stream
+    else:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages_with_clear_query,
+        ).choices[0].message.content
+        return response
 
 # messages를 입력으로 받아, 사용자가 마지막에 보낸 내용을 맥락을 반영해 변환하고, 그 결과를 출력합니다.
 # verbose=True로 설정 시 어떻게 변환됐는지 확인할 수 있습니다.
@@ -113,7 +121,15 @@ def get_clear_query(messages, verbose=False):
     ).choices[0].message.content
 
     if verbose:
-        print(f"\nBefore: {messages[-1]['content']}")
+        print(f"\nBefore: {messages[get_user_last_message_index(messages)]['content']}")
         print(f" After: {clear_query}\n")
 
     return clear_query
+
+def get_user_last_message_index(messages):
+    user_last_message_index = -1
+    for index, message in enumerate(messages[::-1]):
+        if message['role'] == 'user':
+            user_last_message_index = len(messages) - 1 - index
+            break
+    return user_last_message_index
