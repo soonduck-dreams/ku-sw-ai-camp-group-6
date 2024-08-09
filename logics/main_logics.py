@@ -10,7 +10,7 @@ import faiss
 import numpy as np
 import copy
 from logics.util import get_embedding, messages_to_string, print_messages_to_string
-
+import streamlit as st
 
 
 #이하는 test용 database import입니다
@@ -25,7 +25,8 @@ etc_data = db2.data
 
 
 load_dotenv()
-openai_api_key = os.getenv('OPENAI_API_KEY')
+# openai_api_key = os.getenv('OPENAI_API_KEY')
+openai_api_key = st.secrets['OPENAI_API_KEY']
 
 client = OpenAI(api_key=openai_api_key)
 

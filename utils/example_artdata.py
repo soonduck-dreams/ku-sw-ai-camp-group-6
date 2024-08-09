@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*- 
 
+import streamlit as st
+
 database = [
     [
         {'작가명': '이중섭', '작품명': '황소', '제작연도': '1950년대', '재료': '종이에 유채', 
@@ -28,7 +30,8 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-openai_api_key = os.getenv('OPENAI_API_KEY')
+# openai_api_key = os.getenv('OPENAI_API_KEY')
+openai_api_key = st.secrets['OPENAI_API_KEY']
 
 client = OpenAI(api_key=openai_api_key)
 
