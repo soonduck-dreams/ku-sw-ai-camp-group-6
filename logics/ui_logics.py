@@ -42,7 +42,7 @@ def text_to_speech(text, speech_file_path, maltoo_option=0):
     text = text.replace('?', 'You know?')
     text = text.replace(' ', '')
 
-  with openai.audio.speech.with_streaming_response.create(
+  with client.audio.speech.with_streaming_response.create(
     model="tts-1-hd",
     voice=voices[maltoo_option],
     input=text,
