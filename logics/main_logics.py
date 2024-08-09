@@ -4,6 +4,7 @@ from openai import OpenAI
 from prompts.main_prompts import get_clear_query_prompt
 from prompts.maltoo_prompts import get_maltoo_prompt
 import prompts.main_prompts as main_prompts
+import prompts.query_db_prompts as query_db_prompts
 import os
 from dotenv import load_dotenv
 import faiss
@@ -31,7 +32,7 @@ client = OpenAI(api_key=openai_api_key)
 
 
 
-def get_art_data_from_db(query, db_art):
+def get_art_data_from_db(query, db_art, data_num = 3):
     """query와 관련한 DB의 data를 검색해서 string 형태로 도출
     Args:
         messages: 지금껏 주고받은 message 기록 ex)st.session_state.messages
@@ -44,14 +45,14 @@ def get_art_data_from_db(query, db_art):
     art_idx = faiss.IndexFlatL2(len(query_embed))
     db_art_emb = [each_data[1] for each_data in db_art]
     art_idx.add(np.array(db_art_emb))
-    art_dists, art_idxs = art_idx.search(np.array([query_embed]), 3)
+    art_dists, art_idxs = art_idx.search(np.array([query_embed]), data_num)
     
     data_string = main_prompts.make_db_art_to_string(db_art, art_idxs)
     
     return data_string
 
 
-def get_etc_data_from_db(query, db_etc):
+def get_etc_data_from_db(query, db_etc, data_num = 5):
     """query와 관련한 DB의 data를 검색해서 string 형태로 도출
 
     Args:
@@ -64,7 +65,7 @@ def get_etc_data_from_db(query, db_etc):
     etc_idx = faiss.IndexFlatL2(len(query_embed))
     db_etc_emb = [each_data[1] for each_data in db_etc]
     etc_idx.add(np.array(db_etc_emb))
-    etc_dists, etc_idxs = etc_idx.search(np.array([query_embed]), 7)
+    etc_dists, etc_idxs = etc_idx.search(np.array([query_embed]), data_num)
     
     data_string = main_prompts.make_db_etc_to_string(db_etc, etc_idxs)
 
@@ -86,8 +87,23 @@ def get_clear_query(messages, verbose=False):
     if verbose:
         print(f"\nBefore: {messages[get_user_last_message_index(messages)]['content']}")
         print(f" After: {clear_query}\n")
+    
+    art_db_string = get_art_data_from_db(clear_query, art_data, data_num = 7)    
+    etc_db_string = get_etc_data_from_db(clear_query, etc_data, data_num = 7)
+    
+    clear_query_2 = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                'role': 'system', 'content': etc_db_string,
+                'role': 'system', 'content': art_db_string,
+                'role': 'user', 'content': clear_query,
+            }
+        ]
+        + query_db_prompts.query_for_db
+    ).choices[0].message.content
 
-    return clear_query
+    return clear_query_2
 
 
 
