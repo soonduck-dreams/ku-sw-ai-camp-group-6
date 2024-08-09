@@ -2,13 +2,14 @@
 
 from openai import OpenAI
 from prompts.main_prompts import get_clear_query_prompt
+from prompts.maltoo_prompts import get_maltoo_prompt
 import prompts.main_prompts as main_prompts
 import os
 from dotenv import load_dotenv
 import faiss
 import numpy as np
 import copy
-from logics.util import get_embedding, messages_to_string
+from logics.util import get_embedding, messages_to_string, print_messages_to_string
 
 
 
@@ -93,7 +94,7 @@ def get_clear_query(messages, verbose=False):
 
 
 
-def ask(messages, use_stream=False, use_RAG=False):
+def ask(messages, use_stream=False, use_RAG=False, maltoo_option=0):
     """사용자의 질문에 대해 답하는 메인 함수
     Args:
         messages: 지금껏 주고받은 message 기록 ex)st.session_state.messages
@@ -114,15 +115,16 @@ def ask(messages, use_stream=False, use_RAG=False):
         messages_with_clear_query += ([
             {"role": "system", "content": etc_data_string},
             {"role": "system", "content": art_data_string},
-        ]
-        + main_prompts.answer_based_on_data)
+        ])
         #etc_data_string: 사용자 질문(가공됨)에 대한 기타 데이터를 제공.
         #art_data_string: 사용자 질문(가공됨)에 대한 예술품 관련 데이터를 제공.
         #clear_query: 사용자 질문을 지금까지의 문맥을 반영한 질문(즉, 가공됨)으로 변환해 제공.
-        #answer_based_on_data: assistant의 대답을 제어하는 문장. (더 좋은 아이디어가 있으면 수정해주세요)
 
+    messages_with_clear_query += get_maltoo_prompt(maltoo_option)
 
-    print(messages_to_string(messages_with_clear_query))
+    messages_with_clear_query = move_to_end(messages_with_clear_query, user_last_message_index)
+
+    print_messages_to_string(messages_with_clear_query, interval=0.25)
 
     if use_stream:
         stream = client.chat.completions.create(
@@ -146,3 +148,19 @@ def get_user_last_message_index(messages):
             user_last_message_index = len(messages) - 1 - index
             break
     return user_last_message_index
+
+
+def move_to_end(lst, index):
+    """
+    리스트에서 특정 인덱스의 요소를 마지막 위치로 옮기는 함수.
+
+    Parameters:
+    lst (list): 요소를 옮길 리스트
+    index (int): 마지막 위치로 옮길 요소의 인덱스
+
+    Returns:
+    list: 요소가 마지막 위치로 옮겨진 리스트
+    """
+    # 요소를 마지막 위치로 옮기기
+    lst.append(lst.pop(index))
+    return lst
