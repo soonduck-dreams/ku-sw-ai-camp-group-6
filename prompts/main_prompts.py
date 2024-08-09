@@ -10,7 +10,7 @@ if_dbart_only_messages=[{'role': 'system', 'content': "user의 질문에 대해 
         {'role': 'assistant', 'content': 'True'},
         {'role': 'user', 'content': '이중섭의 황소에 담긴 뜻을 알려줘'},
         {'role': 'assistant', 'content': 'False'},]
-''';
+'''
 
 def artdata_to_string(data):
     """예술품 관련 data를 string 형태로 변환
@@ -19,27 +19,24 @@ def artdata_to_string(data):
     """
     ret_str = ""
     for each_key in data.keys():
-        ret_str += "[" + each_key + "]: " + data[each_key]
+        ret_str += each_key + ": " + data[each_key] + '\n'
     return ret_str
 
 
 def make_db_art_to_string(db_art, art_idxs):
     data_string = ""
-    data_string += "예술품 관련 data 목록: ["
+    data_string += "You can use the following artworks on display to answer to user: \n\n"
     for i in art_idxs[0]:
-        data_string += "예술품 data" + str(i + 1) + ": " + artdata_to_string(db_art[i][0]) + "//"
-    data_string += "]"
+        data_string += artdata_to_string(db_art[i][0]) + "\n\n"
     
     return data_string
   
   
   
 def make_db_etc_to_string(db_etc, etc_idxs):
-    data_string = ""
-    data_string += "기타 다양한 data 목록: ["
+    data_string = "You can use the following website search results to answer to user: \n\n"
     for i in etc_idxs[0]:
-        data_string += "기타 data" + str(i + 1) + ": " + db_etc[i][0] + "//"
-    data_string += "]"
+        data_string += db_etc[i][0] + "\n\n"
     
     return data_string
   
@@ -70,35 +67,25 @@ def get_clear_query_prompt(messages):
 
 answer_based_on_data = [
   {'role': 'system', 'content':
-   '답변할 때 정확한 정보에 기반하여 대답해. 확인되지 않은 정보는 절대 사용하지 말고, 모르는 내용에 대해서는 \'잘 모르겠습니다\'라고 답해.'\
-    '예술품 관련 data는 조금 더 신뢰도가 높은 데이터라고 생각하도록 해.'\
-    '사용자의 관심사나 이전 질문을 바탕으로 맞춤형 답변을 제공해. 사용자의 취향을 고려해 더 흥미로운 정보를 제공해봐.'\
-      '대답할 때, 너무 지루하지 않게 감정 표현을 풍부하게 드러내면서도 사용자에게 친근하고 전문적인 느낌을 줄 수 있도록 해.'\
-      '답변은 너무 길어지지 않도록 30초 이내로 짧고 간결하게 제공하도록 해'\
-      '사용자가 질문을 명확하게 이해할 수 있도록, 필요하다면 간단히 질문을 재구성하거나 구체화해'\
-        '다음 질문에 답변할 때는 이전에 제공한 답변을 확인하고, 중복되지 않는 새로운 정보를 제공해줘.'\
-        '긴 설명 후, 주요 포인트를 요약하고 강조해. 사용자가 핵심 정보를 놓치지 않도록 도와줘.'\
-          '답변 후 사용자가 더 궁금한 점이 있는지 물어보고, 추가 질문을 유도해 사용자와의 상호작용을 높여.'},
+   ''},
 ]
 
 def get_user_intent_prompt(text, intent_list):
   intent_list = ' '.join(intent_list)
   prompt = [
-      {'role': 'system', 'content': f'사용자의 말을 다음 중 하나로 분류하라: {intent_list}'},
-      {'role': 'user', 'content': '안녕!'},
-      {'role': 'assistant', 'content': '일상적 대화'},
-      {'role': 'user', 'content': '그림이 너무 예쁘다.'},
-      {'role': 'assistant', 'content': '일상적 대화'},
-      {'role': 'user', 'content': '도슨트로 일한 지 얼마나 됐어?'},
+      {'role': 'system', 'content': f'사용자의 말을 다음 중 1개 이상으로 분류하라: {intent_list}\nFormat: comma-separated values'},
+      {'role': 'user', 'content': '안녕! 나는 지금 이중섭의 황소를 보고 있어.'},
+      {'role': 'assistant', 'content': '일상적 대화, 감상 중인 작품 밝히기'},
+      {'role': 'user', 'content': '오늘 국립현대미술관에 왔어.'},
       {'role': 'assistant', 'content': '일상적 대화'},
       {'role': 'user', 'content': '나는 지금 반 고흐의 해바라기를 보고 있어'},
       {'role': 'assistant', 'content': '감상 중인 작품 밝히기'},
-      {'role': 'user', 'content': '이 작품에서 황소가 무슨 표정을 짓고 있는 거야?'},
-      {'role': 'assistant', 'content': '감상 중인 그림에 대한 직접적 질문'},
       {'role': 'user', 'content': '이 그림을 구매한 이건희의 수집 철학에 대해 알고 있니?'},
-      {'role': 'assistant', 'content': '감상 중인 그림에 대한 간접적 질문'},
-      {'role': 'user', 'content': '같은 시대의 다른 작가를 추천해줘.'},
-      {'role': 'assistant', 'content': '추천 요청'},
+      {'role': 'assistant', 'content': '감상 중인 작품 관련 질문'},
+      {'role': 'user', 'content': '이건희 컬렉션 내에서 일제강점기 영향을 받은 다른 작가는 누가 있고 대표작품은 뭐야?'},
+      {'role': 'assistant', 'content': '다른 작가 또는 작품에 대한 추천 요청'},
+      {'role': 'user', 'content': '이중섭이 소를 즐겨 그리게 된 배경은 뭐야? 이건희 컬렉션 내에 소가 등장하는 다른 작품도 소개해줘'},
+      {'role': 'assistant', 'content': '감상 중인 작품 관련 질문, 다른 작가 또는 작품에 대한 추천 요청'},
       {'role': 'user', 'content': text}
     ]
   return prompt
