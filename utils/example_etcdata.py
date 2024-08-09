@@ -35,9 +35,11 @@ database = [
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+import streamlit as st
 
 load_dotenv()
-openai_api_key = os.getenv('OPENAI_API_KEY')
+# openai_api_key = os.getenv('OPENAI_API_KEY')
+openai_api_key = st.secrets['OPENAI_API_KEY']
 
 client = OpenAI(api_key=openai_api_key)
 
